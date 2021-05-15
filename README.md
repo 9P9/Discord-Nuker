@@ -23,5 +23,3 @@ New Discord Nuker - Updated Features
 
 - Run Install Bat
 - Put user token within tokens file (can have multiple)
-
-![Program Screen](https://imgur.com/mO6mJ56)
