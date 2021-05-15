@@ -1,0 +1,22 @@
+{
+  "name": "server-nuker",
+  "version": "1.0.0",
+  "description": "Discord Server Nuker",
+  "main": "index.js",
+  "dependencies": {
+    "chalk": "^4.1.1",
+    "discord.js": "^11.6.2",
+    "fs": "0.0.1-security",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": ">nuke"
+  },
+  "keywords": [
+    "Discord",
+    "Nuke"
+  ],
+  "author": "Luci",
+  "license": "ISC"
+}
