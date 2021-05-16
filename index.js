@@ -22,22 +22,22 @@ function write(content, file) {
 }
 function prune(token, guild){
 	request({
-			method: "POST",
-			url: `https://discord.com/api/v9/guilds/${guild}/prune`, 
-			json: true,
-			headers: {
-					"authorization": token,
-					"Content-Type": "application/json",
-				},
-			body: { "compute_prune_count": false, "days": 1, "include_roles": ["744165933811105846"] }
-			}, (err, res, body) => {
-			if (res && res.statusCode === 200) {
-				console.log(chalk.inverse.hex("00FF00")("[PRUNE] Started Kicking Members From Server!"));
-			}
-			else{
-				console.log(chalk.red("[PRUNE] Failed To Start! Will Keep Attempting until Successful!"));
-				prune(token, guild);
-			}})
+		method: "POST",
+		url: `https://discord.com/api/v9/guilds/${guild}/prune`, 
+		json: true,
+		headers: {
+			"authorization": token,
+			"Content-Type": "application/json",
+		 },
+		body: { "compute_prune_count": false, "days": 1, "include_roles": ["744165933811105846"] }
+		}, (err, res, body) => {
+		if (res && res.statusCode === 200) {
+			console.log(chalk.inverse.hex("00FF00")("[PRUNE] Started Kicking Members From Server!"));
+		}
+		else{
+			console.log(chalk.red("[PRUNE] Failed To Start! Will Keep Attempting until Successful!"));
+			prune(token, guild);
+		}})
 }
 function admin(token, guild, everyone){
 	request({
