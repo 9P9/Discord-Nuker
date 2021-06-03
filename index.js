@@ -4,7 +4,6 @@ const proxies = fs.readFileSync('./variables/proxies.txt', 'utf-8').replace(/\r|
 const botconfig = require("./variables/botconfig.json");
 const Discord = require("discord.js");
 const request = require('request');
-const prompt = require('prompt');
 var chalk = require('chalk');
 var time = new Date().toDateString() + ' ' + new Date().toLocaleTimeString();
 
